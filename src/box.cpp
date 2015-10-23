@@ -74,34 +74,32 @@ bool Box::intersect(const Vector3D& O, float radius)
   return (dist <= (radius*radius));
 }
 
-bool Box::intersect(const Vector3D& O, const Vector3D& D,
-                    float segmax)
+bool Box::intersect(const Vector3D& O, const Vector3D& segdir, const Vector3D& abs_segdir, const Vector3D& seg_center)
 {
-  if (segmax>3e30f) return intersect(O,D); // infinite ray
-  Vector3D abs_segdir, abs_diff, abs_cross; 
+    //if (segmax > 3e30f) return intersect(O, D); // infinite ray
+    Vector3D diff;
 
-  Vector3D segdir=0.5f*segmax*D;
-  Vector3D seg_center=O+segdir;
-  Vector3D diff=seg_center - getCenter();
-  int i;
-  for(i=0;i<3;i++)
-  {
-    abs_segdir[i]=flabs(segdir[i]);
-    abs_diff[i]=flabs(diff[i]);
-    float f=getSize()[i] + abs_segdir[i];
-    if (abs_diff[i] > f) return false;
-  }
-  Vector3D cross=CrossProduct(segdir,diff);
-  int idx[] = {0,1,2,0,1};
-  for(i=0;i<3;i++)
-  {
-    int i1=idx[i+1];
-    int i2=idx[i+2];
-    abs_cross[i] = flabs(cross[i]);
-    float f = getSize()[i1]*abs_segdir[i2] + getSize()[i2]*abs_segdir[i1];
-    if ( abs_cross[i] > f ) return false;
-  }
-  return true;
+    for (int i = 0; i < 3; i++) {
+        diff[i] = seg_center[i] - m_Center[i];
+        float const abs_diff = flabs(diff[i]);
+        float const f1 = m_Size[i] + abs_segdir[i];
+        if (abs_diff > f1) return false;
+    }
+
+    Vector3D const cross = CrossProduct(segdir, diff);
+    //Vector3D const cross(segdir[1] * diff[2] - diff[1] * segdir[2],
+    //                     segdir[2] * diff[0] - diff[2] * segdir[0],
+    //                     segdir[0] * diff[1] - diff[0] * segdir[1]);
+    int const idx[] = { 0, 1, 2, 0, 1 };
+
+    for (int i = 0; i < 3; i++) {
+        int const i1 = idx[i + 1];
+        int const i2 = idx[i + 2];
+        float const abs_cross = std::abs(cross[i]);// segdir[i1] * diff[i2] - diff[i1] * segdir[i2]);
+        float const f2 = abs_segdir[i2] * m_Size[i1] + abs_segdir[i1] * m_Size[i2];
+        if (abs_cross > f2) return false;
+    }
+    return true;
 }
 
 bool Box::intersect(const Vector3D& O, const Vector3D& D)

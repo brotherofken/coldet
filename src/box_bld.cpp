@@ -52,7 +52,7 @@ bool Box::intersect(const Box& b)
 BoxedTriangle::BoxedTriangle(const Vector3D& _1, 
                              const Vector3D& _2, 
                              const Vector3D& _3)
-                             : BoxTreeNode(), Triangle(_1,_2,_3)
+                             : BoxTreeInnerNode({ 0, 0, 0 }, { 0, 0, 0 }, 0), Triangle(_1, _2, _3)
 {
   m_Pos.x=Min(Min(_1.x,_2.x),_3.x);
   m_Pos.y=Min(Min(_1.y,_2.y),_3.y);

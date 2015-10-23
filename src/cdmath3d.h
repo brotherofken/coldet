@@ -160,19 +160,15 @@ struct Matrix3D
 /** 3D Plane.  Used in conjunction with triangles. */
 struct Plane
 {
-  Vector3D normal;
-  float    d;
+  Vector3D const normal;
+  float    const d;
 
   Plane(const Vector3D& a, const Vector3D& b, const Vector3D& c)
-  {
-    normal = CrossProduct(b - a, c - a).Normalized();
-    d = -normal * a;
-  }
+      : normal(CrossProduct(b - a, c - a).Normalized())
+      , d(-normal * a)
+  {}
 
-  float Classify(const Vector3D& v)
-  {
-    return v * normal + d;
-  }
+  inline float Classify(const Vector3D& v) const { return v * normal + d; }
 };
 
 inline Vector3D operator* (float scalar, const Vector3D& v)
@@ -197,9 +193,9 @@ inline float operator* (const Vector3D& v1, const Vector3D& v2)
 
 inline Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2)
 {
-  return Vector3D(v1.y*v2.z-v2.y*v1.z,
-                  v1.z*v2.x-v2.z*v1.x,
-                  v1.x*v2.y-v2.x*v1.y);
+  return Vector3D(v1.y * v2.z - v2.y * v1.z,
+                  v1.z * v2.x - v2.z * v1.x,
+                  v1.x * v2.y - v2.x * v1.y);
 }
 
 inline Vector3D Transform(const Vector3D& v, const Matrix3D& m)

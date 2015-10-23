@@ -57,17 +57,17 @@ public:
   Box(const Box& b) : m_Pos(b.m_Pos), m_Size(b.m_Size), m_Center(b.m_Center) {}
   virtual ~Box() {}
   /** Returns the box's position */
-  const Vector3D& getPosition() const { return m_Pos; }
+  inline const Vector3D& getPosition() const { return m_Pos; }
   /** Returns the sizes of the box's edges */
-  const Vector3D& getSize() const { return m_Size; }
+  inline const Vector3D& getSize() const { return m_Size; }
   /** Returns the center position of the box */
-  const Vector3D& getCenter() const { return m_Center; }
+  inline const Vector3D& getCenter() const { return m_Center; }
   /** Returns the volume of the box */
   float getVolume() const { return m_Size.x*m_Size.y*m_Size.z; }
   /** Ray intersection */
   bool intersect(const Vector3D& O, const Vector3D& D);
   /** Line segment intersection */
-  bool intersect(const Vector3D& O, const Vector3D& D, float segmax);
+  bool intersect(const Vector3D& O, const Vector3D& segdir, const Vector3D& abs_segdir, const Vector3D& seg_center);
   /** Sphere intersection */
   bool intersect(const Vector3D& O, float radius);
   /** Point in box */
@@ -165,34 +165,31 @@ public:
   /** Recursively divide this box */
   int  divide(int p_depth);
 
-  int getSonsNumber()
+  inline int getSonsNumber()
   {
-    int n=0;
-    if (m_First!=NULL) n++;
-    if (m_Second!=NULL) n++;
-    return n;
+    return (m_First ? 1 : 0) + (m_Second ? 1 : 0);
   }
 
   int getTrianglesNumber();
   BoxedTriangle* getTriangle(int which);
 
-  BoxTreeNode* getSon(int which)
+  inline BoxTreeNode* getSon(int which)
   {
     if (which==0) return m_First;
     if (which==1) return m_Second;
     return NULL;
   }
 
-  BoxTreeNode*                m_First;
+  BoxTreeInnerNode*                m_First;
   bool                        m_OwnFirst;
-  BoxTreeNode*                m_Second;
+  BoxTreeInnerNode*                m_Second;
   bool                        m_OwnSecond;
   int                         m_logdepth;
   std::vector<BoxedTriangle*> m_Boxes;
 };
 
 /** Leaf node, containing 1 triangle. */
-class BoxedTriangle : public BoxTreeNode, public Triangle
+class BoxedTriangle : public BoxTreeInnerNode, public Triangle
 {
 public:
   BoxedTriangle(const Vector3D& _1, const Vector3D& _2, const Vector3D& _3);
