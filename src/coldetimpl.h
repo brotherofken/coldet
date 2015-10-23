@@ -76,7 +76,7 @@ public:
 
   int getTriangleIndex(BoxedTriangle* bt)
   {
-    return int(bt-&(*m_Triangles.begin()));
+    return int(bt - &(*m_Triangles.begin()));
   }
 
   /** Stores all the actual triangles.  Other objects will use
@@ -85,7 +85,7 @@ public:
   std::vector<BoxedTriangle> m_Triangles;
   /** Root of the hierarchy tree */
   BoxTreeInnerNode*             m_Root;
-  std::vector<BoxTreeInnerNode> m_BoxTree;
+  TreeStorage                   m_BoxTree;
   /** The current transform and its inverse */
   Matrix3D                   m_Transform,m_InvTransform;
   /** The triangles that last collided */

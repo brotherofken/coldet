@@ -30,6 +30,9 @@
 
 __CD__BEGIN
 
+class BoxTreeInnerNode;
+using TreeStorage = std::vector<BoxTreeInnerNode>;
+
 /** Stores rotation vectors used in the intersection tests, 
     to avoid recalculating them each time. */
 class RotationState
@@ -151,19 +154,19 @@ public:
       m_logdepth(logdepth), m_OwnFirst(true), m_OwnSecond(true) {}
   ~BoxTreeInnerNode()
   {
-    if (m_OwnFirst)  delete m_First;
-    if (m_OwnSecond) delete m_Second;
+    //if (m_OwnFirst)  delete m_First;
+    //if (m_OwnSecond) delete m_Second;
   }
 
   virtual bool isLeaf() const { return false; }
   /** Create the sons that will divide this box */
-  int  createSons(const Vector3D& center);
+  int  createSons(const Vector3D& center, TreeStorage& tree_storage);
   /** Recalculate the bounds of this box to fully contain
       all of its triangles
   */
   void recalcBounds(Vector3D& center);
   /** Recursively divide this box */
-  int  divide(int p_depth);
+  int divide(int p_depth, TreeStorage& tree_storage);
 
   inline int getSonsNumber()
   {
