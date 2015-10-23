@@ -63,9 +63,9 @@ bool CollisionModel3DImpl::collision(CollisionModel3D* other,
   
   int queue_idx=1;
   Check& c=checks[0];
-  c.m_first=&m_Root;
+  c.m_first=m_Root;
   c.depth=0;
-  c.m_second=&o->m_Root;
+  c.m_second=o->m_Root;
   while (queue_idx>0)
   {
     if (queue_idx>(Allocated/2)) // enlarge the queue.
@@ -217,7 +217,7 @@ bool CollisionModel3DImpl::rayCollision(const float origin[3],
     }
     std::vector<BoxTreeInnerNode*> checks;
     checks.reserve(1024);
-    checks.push_back(&m_Root);
+    checks.push_back(m_Root);
 
     Vector3D const segdir = 0.5 * segmax * D;
     Vector3D const abs_segdir(std::abs(segdir.x), std::abs(segdir.y), std::abs(segdir.z));
@@ -284,7 +284,7 @@ bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
     O=Transform(*(Vector3D*)origin,inv);
   }
   std::vector<BoxTreeNode*> checks;
-  checks.push_back(&m_Root);
+  checks.push_back(m_Root);
   while (!checks.empty())
   {
     BoxTreeNode* b=checks.back();

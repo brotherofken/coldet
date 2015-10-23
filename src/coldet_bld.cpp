@@ -32,7 +32,8 @@ EXPORT CollisionModel3D* newCollisionModel3D(bool Static)
 __CD__BEGIN
 
 CollisionModel3DImpl::CollisionModel3DImpl(bool Static)
-: m_Root(Vector3D::Zero, Vector3D::Zero,0),
+: m_Root(nullptr),// Vector3D::Zero, Vector3D::Zero, 0),
+  m_BoxTree(1, BoxTreeInnerNode(Vector3D::Zero, Vector3D::Zero, 0)),
   m_Transform(Matrix3D::Identity),
   m_InvTransform(Matrix3D::Identity),
   m_ColTri1(Vector3D::Zero,Vector3D::Zero,Vector3D::Zero),
@@ -42,7 +43,9 @@ CollisionModel3DImpl::CollisionModel3DImpl(bool Static)
   m_Final(false),
   m_Static(Static),
   m_Radius(0)
-{}
+{
+    m_Root = &m_BoxTree[0];
+}
 
 void CollisionModel3DImpl::addTriangle(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3)
 {
@@ -61,19 +64,19 @@ void CollisionModel3DImpl::setTransform(const Matrix3D& m)
 
 void CollisionModel3DImpl::finalize()
 {
-  if (m_Final) throw Inconsistency();
-  // Prepare initial triangle list
-  m_Final=true;
-  m_Radius=sqrt(m_Radius);
-  for(unsigned i=0;i<m_Triangles.size();i++)
-  {
-    BoxedTriangle& bt=m_Triangles[i];
-    m_Root.m_Boxes.push_back(&bt);
-  }
-  int logdepth=0;
-  for(int num=m_Triangles.size();num>0;num>>=1,logdepth++);
-  m_Root.m_logdepth=int(logdepth*1.5f);
-  m_Root.divide(0);
+    if (m_Final) throw Inconsistency();
+    // Prepare initial triangle list
+    m_Final = true;
+    m_Radius = sqrt(m_Radius);
+    for (unsigned i = 0; i < m_Triangles.size(); i++)
+    {
+        BoxedTriangle& bt = m_Triangles[i];
+        m_Root->m_Boxes.push_back(&bt);
+    }
+    int logdepth = 0;
+    for (int num = m_Triangles.size(); num > 0; num >>= 1, logdepth++);
+    m_Root->m_logdepth = int(logdepth*1.5f);
+    m_Root->divide(0);
 }
 
 __CD__END

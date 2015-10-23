@@ -84,7 +84,8 @@ public:
   */
   std::vector<BoxedTriangle> m_Triangles;
   /** Root of the hierarchy tree */
-  BoxTreeInnerNode           m_Root;
+  BoxTreeInnerNode*             m_Root;
+  std::vector<BoxTreeInnerNode> m_BoxTree;
   /** The current transform and its inverse */
   Matrix3D                   m_Transform,m_InvTransform;
   /** The triangles that last collided */

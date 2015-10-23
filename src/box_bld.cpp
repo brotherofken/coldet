@@ -67,30 +67,30 @@ BoxedTriangle::BoxedTriangle(const Vector3D& _1,
 
 int BoxTreeInnerNode::createSons(const Vector3D& center)
 {
-  int longest=0;
-  Vector3D p=getPosition();
-  Vector3D s=getSize();
+    int longest = 0;
+    Vector3D p = getPosition();
+    Vector3D s = getSize();
 
-  Vector3D dist(Vector3D::Zero);
-  for(unsigned i=0;i<m_Boxes.size();i++)
-  {
-    BoxedTriangle* bt=m_Boxes[i];
-    dist.x+=flabs(bt->center.x - center.x);
-    dist.y+=flabs(bt->center.y - center.y);
-    dist.z+=flabs(bt->center.z - center.z);
-  }
-  if (dist.y>dist.x && dist.y>dist.z) longest=1;
-  else
-  if (dist.z>dist.x && dist.z>dist.y) longest=2;
+    Vector3D dist(Vector3D::Zero);
+    for (unsigned i = 0; i < m_Boxes.size(); i++) {
+        BoxedTriangle* bt = m_Boxes[i];
+        dist.x += flabs(bt->center.x - center.x);
+        dist.y += flabs(bt->center.y - center.y);
+        dist.z += flabs(bt->center.z - center.z);
+    }
+    if (dist.y > dist.x && dist.y > dist.z) longest = 1;
+    else
+        if (dist.z > dist.x && dist.z > dist.y) longest = 2;
 
-  float s1=center[longest]-p[longest];
-  float s2=s[longest]-s1;
-  s[longest]=s1;
-  m_First=new BoxTreeInnerNode(p,s,m_logdepth);
-  p[longest]+=s1;
-  s[longest]=s2;
-  m_Second=new BoxTreeInnerNode(p,s,m_logdepth);
-  return longest;
+    float const s1 = center[longest] - p[longest];
+    float const s2 = s[longest] - s1;
+    s[longest] = s1;
+    m_First = new BoxTreeInnerNode(p, s, m_logdepth);
+
+    p[longest] += s1;
+    s[longest] = s2;
+    m_Second = new BoxTreeInnerNode(p, s, m_logdepth);
+    return longest;
 }
 
 void BoxTreeInnerNode::recalcBounds(Vector3D& center)
@@ -120,62 +120,65 @@ void BoxTreeInnerNode::recalcBounds(Vector3D& center)
 
 int BoxTreeInnerNode::divide(int p_depth)
 {
-  if (m_Boxes.empty()) return 0;
-  Vector3D center;
-  recalcBounds(center);
-  int longest=createSons(center);
-  BoxTreeInnerNode* f=static_cast<BoxTreeInnerNode*>(m_First);
-  BoxTreeInnerNode* s=static_cast<BoxTreeInnerNode*>(m_Second);
-  int depth=1;
-  int bnum=m_Boxes.size();
+    if (m_Boxes.empty()) return 0;
+    Vector3D center;
+    recalcBounds(center);
+    int longest = createSons(center);
+    BoxTreeInnerNode* f = static_cast<BoxTreeInnerNode*>(m_First);
+    BoxTreeInnerNode* s = static_cast<BoxTreeInnerNode*>(m_Second);
+    int depth = 1;
+    int bnum = m_Boxes.size();
 #ifdef _DEBUG
-  int fnum=0;
+    int fnum=0;
 #endif
-  for(int i=0;i<bnum;i++)
-  {
-    BoxedTriangle* bt=m_Boxes[i];
-    if (bt->center[longest]<center[longest])
-    {
-      f->m_Boxes.push_back(bt);
-      #ifdef _DEBUG
-        fnum++;
-      #endif
+    for (int i = 0; i < bnum; i++) {
+        BoxedTriangle* bt = m_Boxes[i];
+        if (bt->center[longest] < center[longest]) {
+            f->m_Boxes.push_back(bt);
+#ifdef _DEBUG
+            fnum++;
+#endif
+        } else {
+            s->m_Boxes.push_back(bt);
+        }
     }
-    else
-    {
-      s->m_Boxes.push_back(bt);
+
+    int b1num = f->m_Boxes.size();
+    int b2num = s->m_Boxes.size();
+    if ((b1num == bnum || b2num == bnum)) {// && p_depth>m_logdepth)
+        delete m_First;  m_First = NULL;
+        delete m_Second; m_Second = NULL;
+        return depth + 1;
     }
-  }
-  
-  int b1num=f->m_Boxes.size();
-  int b2num=s->m_Boxes.size();
-  if ((b1num==bnum  ||  b2num==bnum))// && p_depth>m_logdepth)
-  {
-    delete m_First;  m_First=NULL;
-    delete m_Second; m_Second=NULL;
-    return depth+1;
-  }
-  
-  m_Boxes.clear();
-  if (f->m_Boxes.empty()) { delete m_First; m_First=NULL; }
-  else
-  if (f->m_Boxes.size()==1)
-  {
-    BoxedTriangle* bt=f->m_Boxes.back();
-    delete m_First;
-    m_OwnFirst=false;
-    m_First=bt;
-  } else depth=f->divide(p_depth+1);
-  if (s->m_Boxes.empty()) { delete m_Second; m_Second=NULL; }
-  else
-  if (s->m_Boxes.size()==1)
-  {
-    BoxedTriangle* bt=s->m_Boxes.back();
-    delete m_Second;
-    m_OwnSecond=false;
-    m_Second=bt;
-  } else depth=Max(depth,s->divide(p_depth+1));
-  return depth+1;
+
+    m_Boxes.clear();
+    if (f->m_Boxes.empty()) { 
+        delete m_First;
+        m_First = NULL; 
+    } else {
+        if (f->m_Boxes.size() == 1) {
+            BoxedTriangle* bt = f->m_Boxes.back();
+            delete m_First;
+            m_OwnFirst = false;
+            m_First = bt;
+        } else {
+            depth = f->divide(p_depth + 1);
+        }
+        if (s->m_Boxes.empty()) {
+            delete m_Second;
+            m_Second = NULL;
+        } else {
+            if (s->m_Boxes.size() == 1) {
+                BoxedTriangle* bt = s->m_Boxes.back();
+                delete m_Second;
+                m_OwnSecond = false;
+                m_Second = bt;
+            } else {
+                depth = Max(depth, s->divide(p_depth + 1));
+            }
+            return depth + 1;
+        }
+    }
 }
 
 __CD__END
